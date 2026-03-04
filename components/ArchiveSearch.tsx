@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import CustomCalendar from './CustomCalendar';
 import { AttendanceRecord, Group } from '../types';
