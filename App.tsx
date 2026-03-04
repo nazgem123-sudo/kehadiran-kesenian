@@ -21,7 +21,7 @@ export const getLocalISOString = (date: Date = new Date()) => {
 };
 
 // URL Deployment yang dikemaskini mengikut arahan pengguna
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwLx7hUc-EJ6qql5YL_Q_-jnUk5N7f0orsT12yJDIw2357AsCyxWKfZipyN0m4UdriUmw/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5Hj_m6bWbtm9Cl-7PciDHDs-liezzvX0pibK94GFO9aMgNox-yO2FzAAb4spAbJ50mQ/exec';
 const SPREADSHEET_ID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
 const App: React.FC = () => {
