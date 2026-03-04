@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import CustomCalendar from './CustomCalendar';
 import { AttendanceRecord, Group } from '../types';
@@ -35,6 +36,7 @@ const TINGKATAN_MAP: Record<string, string> = {
 const ArchiveSearch: React.FC<ArchiveSearchProps> = ({ googleScriptUrl, attendance, spreadsheetId }) => {
   // Gunakan getLocalISOString() untuk memastikan tarikh awal adalah tarikh tempatan yang tepat
   const [searchDate, setSearchDate] = useState(getLocalISOString());
+  const [searchMode, setSearchMode] = useState<'DAY' | 'MONTH'>('DAY');
   const [filterGroup, setFilterGroup] = useState<Group | 'ALL'>('ALL');
   const [filterCoach, setFilterCoach] = useState<string | 'ALL'>('ALL');
   const [filterTime, setFilterTime] = useState<string | 'ALL'>('ALL');
@@ -70,14 +72,18 @@ const ArchiveSearch: React.FC<ArchiveSearchProps> = ({ googleScriptUrl, attendan
 
   const groupedResults = useMemo(() => {
     return filteredResults.reduce((acc, item) => {
-      const groupName = item.group || 'TIADA KUMPULAN';
+      // Group by date first if searchMode is MONTH, otherwise group by groupName
+      const groupName = searchMode === 'MONTH' 
+        ? `${item.date} - ${item.group || 'TIADA KUMPULAN'}`
+        : (item.group || 'TIADA KUMPULAN');
+        
       if (!acc[groupName]) {
         acc[groupName] = [];
       }
       acc[groupName].push(item);
       return acc;
     }, {} as Record<string, ArchiveResult[]>);
-  }, [filteredResults]);
+  }, [filteredResults, searchMode]);
 
   const showNotification = (msg: string, type: 'SUCCESS' | 'WARNING' | 'ERROR') => {
     setToast({ show: true, msg, type });
@@ -95,14 +101,21 @@ const ArchiveSearch: React.FC<ArchiveSearchProps> = ({ googleScriptUrl, attendan
     setResults([]);
     
     try {
+      const payload: any = { 
+        action: 'search_attendance', 
+        spreadsheetId: spreadsheetId
+      };
+      
+      if (searchMode === 'MONTH') {
+        payload.targetMonth = searchDate.substring(0, 7);
+      } else {
+        payload.targetDate = searchDate;
+      }
+
       const response = await fetch(googleScriptUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ 
-          action: 'search_attendance', 
-          spreadsheetId: spreadsheetId,
-          targetDate: searchDate 
-        }),
+        body: JSON.stringify(payload),
         redirect: 'follow'
       });
       
@@ -167,15 +180,20 @@ const ArchiveSearch: React.FC<ArchiveSearchProps> = ({ googleScriptUrl, attendan
     showNotification("Sedang memadam rekod daripada Cloud...", "SUCCESS");
 
     try {
-      const payload = { 
+      const payload: any = { 
         action: 'delete_attendance', 
         spreadsheetId: spreadsheetId,
-        targetDate: searchDate,
         timeSlot: timeSlotStr,
         group: groupStr,
         coachName: coachStr,
         roomName: "" 
       };
+      
+      if (searchMode === 'MONTH') {
+        payload.targetMonth = searchDate.substring(0, 7);
+      } else {
+        payload.targetDate = searchDate;
+      }
       
       console.log("Sending delete payload:", payload);
       
@@ -356,12 +374,30 @@ const ArchiveSearch: React.FC<ArchiveSearchProps> = ({ googleScriptUrl, attendan
           
           <div className="space-y-5">
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">1. Pilih Tarikh</label>
+              <div className="flex items-center justify-between mb-2 ml-1">
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">1. Pilih Tarikh / Bulan</label>
+              </div>
+              
+              <div className="flex bg-slate-100 p-1 rounded-xl mb-4">
+                <button 
+                  onClick={() => setSearchMode('DAY')}
+                  className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${searchMode === 'DAY' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  Cari Hari
+                </button>
+                <button 
+                  onClick={() => setSearchMode('MONTH')}
+                  className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${searchMode === 'MONTH' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                  Cari Bulan
+                </button>
+              </div>
+
               <div className="flex justify-center mb-2">
-                <CustomCalendar selectedDate={searchDate} onDateChange={(d) => setSearchDate(d)} recordedDates={recordedDates} />
+                <CustomCalendar selectedDate={searchDate} onDateChange={(d) => setSearchDate(d)} recordedDates={recordedDates} searchMode={searchMode} />
               </div>
               <p className="text-[9px] text-slate-400 font-bold uppercase text-center mb-4 px-4 leading-relaxed">
-                <i className="fas fa-info-circle mr-1"></i> Titik biru menunjukkan data tempatan. Anda boleh mencari sebarang tarikh yang telah disimpan ke Cloud.
+                <i className="fas fa-info-circle mr-1"></i> {searchMode === 'MONTH' ? 'Carian akan mengambil semua rekod dalam bulan yang dipaparkan pada kalendar.' : 'Titik biru menunjukkan data tempatan. Anda boleh mencari sebarang tarikh yang telah disimpan ke Cloud.'}
               </p>
             </div>
 
