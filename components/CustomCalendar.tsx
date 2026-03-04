@@ -6,9 +6,10 @@ interface CustomCalendarProps {
   selectedDate: string;
   onDateChange: (date: string) => void;
   recordedDates: Set<string>;
+  searchMode?: 'DAY' | 'MONTH';
 }
 
-const CustomCalendar: React.FC<CustomCalendarProps> = ({ selectedDate, onDateChange, recordedDates }) => {
+const CustomCalendar: React.FC<CustomCalendarProps> = ({ selectedDate, onDateChange, recordedDates, searchMode = 'DAY' }) => {
   const [viewDate, setViewDate] = useState(new Date(selectedDate));
 
   useEffect(() => {
@@ -41,11 +42,19 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({ selectedDate, onDateCha
   const year = viewDate.getFullYear();
 
   const handlePrevMonth = () => {
-    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
+    const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+    setViewDate(newDate);
+    if (searchMode === 'MONTH') {
+      onDateChange(getLocalISOString(newDate));
+    }
   };
 
   const handleNextMonth = () => {
-    setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
+    const newDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
+    setViewDate(newDate);
+    if (searchMode === 'MONTH') {
+      onDateChange(getLocalISOString(newDate));
+    }
   };
 
   const isToday = (date: Date) => {
@@ -56,6 +65,10 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({ selectedDate, onDateCha
 
   const isSelected = (date: Date) => {
     const dStr = getLocalISOString(date);
+    if (searchMode === 'MONTH') {
+      const selected = new Date(selectedDate);
+      return date.getMonth() === selected.getMonth() && date.getFullYear() === selected.getFullYear();
+    }
     return dStr === selectedDate;
   };
 
@@ -98,13 +111,17 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({ selectedDate, onDateCha
             <button
               key={idx}
               onClick={() => onDateChange(getLocalISOString(date))}
-              className={`relative h-9 sm:h-11 flex flex-col items-center justify-center rounded-xl sm:rounded-2xl text-[12px] sm:text-[13px] transition-all ${selected ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 font-bold z-10' : 'hover:bg-slate-50 text-slate-500'} ${today && !selected ? 'border border-indigo-100 bg-indigo-50/30' : ''}`}
+              className={`relative h-9 sm:h-11 flex flex-col items-center justify-center rounded-xl sm:rounded-2xl text-[12px] sm:text-[13px] transition-all 
+                ${selected && searchMode === 'DAY' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 font-bold z-10' : ''} 
+                ${selected && searchMode === 'MONTH' ? 'bg-indigo-100 text-indigo-700 font-bold' : ''} 
+                ${!selected ? 'hover:bg-slate-50 text-slate-500' : ''} 
+                ${today && !selected ? 'border border-indigo-100 bg-indigo-50/30' : ''}`}
             >
-              <span className={`${active ? 'font-black text-slate-950' : 'font-medium'} ${selected ? 'text-white font-black' : ''}`}>
+              <span className={`${active ? 'font-black text-slate-950' : 'font-medium'} ${selected && searchMode === 'DAY' ? 'text-white font-black' : ''} ${selected && searchMode === 'MONTH' ? 'text-indigo-700 font-black' : ''}`}>
                 {date.getDate()}
               </span>
               {active && (
-                <span className={`absolute bottom-1 w-1 h-1 rounded-full ${selected ? 'bg-white' : 'bg-indigo-600'}`}></span>
+                <span className={`absolute bottom-1 w-1 h-1 rounded-full ${selected && searchMode === 'DAY' ? 'bg-white' : 'bg-indigo-600'}`}></span>
               )}
             </button>
           );
