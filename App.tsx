@@ -21,7 +21,7 @@ export const getLocalISOString = (date: Date = new Date()) => {
 };
 
 // URL Deployment yang dikemaskini mengikut arahan pengguna
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5Hj_m6bWbtm9Cl-7PciDHDs-liezzvX0pibK94GFO9aMgNox-yO2FzAAb4spAbJ50mQ/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxA9FRO6xDHfFR0cBXGShCkkmoqP3NRmhPK_DLiuMCKWkQFeEMY4RrljWCeH5yBWALjnA/exec';
 const SPREADSHEET_ID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
 const App: React.FC = () => {
@@ -32,7 +32,7 @@ const App: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(window.innerWidth >= 1024);
   
-  const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbx5Hj_m6bWbtm9Cl-7PciDHDs-liezzvX0pibK94GFO9aMgNox-yO2FzAAb4spAbJ50mQ/exec';
+  const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbxA9FRO6xDHfFR0cBXGShCkkmoqP3NRmhPK_DLiuMCKWkQFeEMY4RrljWCeH5yBWALjnA/exec';
   const DEFAULT_SID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
   const [googleScriptUrl, setGoogleScriptUrl] = useState<string>(() => {
@@ -413,10 +413,19 @@ const App: React.FC = () => {
       var data = sheet.getDataRange().getValues();
       var results = [];
       var searchDate = params.targetDate;
+      var searchMonth = params.targetMonth; // e.g. "2026-03"
       
       for (var i = 1; i < data.length; i++) {
         var rowDate = formatDateSafe(data[i][0]);
-        if (rowDate == searchDate) {
+        var match = false;
+        
+        if (searchMonth) {
+          match = rowDate.indexOf(searchMonth) === 0;
+        } else if (searchDate) {
+          match = rowDate == searchDate;
+        }
+        
+        if (match) {
           results.push({
             date: rowDate,
             day: (data[i][1] || "").toString().trim(),
@@ -439,6 +448,7 @@ const App: React.FC = () => {
       var data = sheet.getDataRange().getValues();
       var deletedCount = 0;
       var targetDate = params.targetDate;
+      var targetMonth = params.targetMonth;
       
       for (var i = data.length - 1; i >= 1; i--) {
         var rowDate = formatDateSafe(data[i][0]);
@@ -449,7 +459,13 @@ const App: React.FC = () => {
         var rowGroup = (data[i][6] || "").toString().trim().toUpperCase();
         var rowRoom = (data[i][10] || "").toString().trim().toUpperCase();
         
-        var matchDate = (rowDate == targetDate);
+        var matchDate = false;
+        if (targetMonth) {
+          matchDate = rowDate.indexOf(targetMonth) === 0;
+        } else if (targetDate) {
+          matchDate = rowDate == targetDate;
+        }
+        
         var matchTime = (!params.timeSlot || params.timeSlot == "" || rowTime == params.timeSlot.toString().trim().toUpperCase());
         var matchRoom = (!params.roomName || params.roomName == "" || rowRoom == params.roomName.toString().trim().toUpperCase());
         var matchGroup = (!params.group || params.group == "" || rowGroup == params.group.toString().trim().toUpperCase());
