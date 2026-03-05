@@ -8,7 +8,6 @@ import StudentList from './components/StudentList';
 import AddStudent from './components/AddStudent';
 import ImportStudent from './components/ImportStudent';
 import Summary from './components/Summary';
-
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import ArchiveSearch from './components/ArchiveSearch';
@@ -22,7 +21,7 @@ export const getLocalISOString = (date: Date = new Date()) => {
 };
 
 // URL Deployment yang dikemaskini mengikut arahan pengguna
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxA9FRO6xDHfFR0cBXGShCkkmoqP3NRmhPK_DLiuMCKWkQFeEMY4RrljWCeH5yBWALjnA/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwLx7hUc-EJ6qql5YL_Q_-jnUk5N7f0orsT12yJDIw2357AsCyxWKfZipyN0m4UdriUmw/exec';
 const SPREADSHEET_ID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
 const App: React.FC = () => {
@@ -33,7 +32,7 @@ const App: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(window.innerWidth >= 1024);
   
-  const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbxA9FRO6xDHfFR0cBXGShCkkmoqP3NRmhPK_DLiuMCKWkQFeEMY4RrljWCeH5yBWALjnA/exec';
+  const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwLx7hUc-EJ6qql5YL_Q_-jnUk5N7f0orsT12yJDIw2357AsCyxWKfZipyN0m4UdriUmw/exec';
   const DEFAULT_SID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
   const [googleScriptUrl, setGoogleScriptUrl] = useState<string>(() => {
