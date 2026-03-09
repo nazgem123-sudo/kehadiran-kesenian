@@ -12,9 +12,9 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, setView, onLogout, isOpen, toggleSidebar }) => {
   const menuItems: { id: View; label: string; icon: string }[] = [
-    { id: 'DASHBOARD', label: 'Papan Pemuka', icon: 'fa-chart-line' },
-    { id: 'CARIAN_ARKIB', label: 'Semakan Arkib', icon: 'fa-search-location' },
-    { id: 'DATA_MURID', label: 'Data Murid', icon: 'fa-users' },
+    { id: 'DASHBOARD', label: 'Isi Kehadiran', icon: 'fa-chart-line' },
+    { id: 'CARIAN_ARKIB', label: 'Cetak Kehadiran', icon: 'fa-search-location' },
+    { id: 'DATA_MURID', label: 'Maklumat Murid', icon: 'fa-users' },
     { id: 'TAMBAH_MURID', label: 'Tambah Murid', icon: 'fa-user-plus' },
     { id: 'IMPORT_MURID', label: 'Import Murid', icon: 'fa-file-import' },
     { id: 'RINGKASAN', label: 'Ringkasan', icon: 'fa-file-contract' },
