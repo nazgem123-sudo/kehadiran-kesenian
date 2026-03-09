@@ -10,12 +10,12 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ currentView, toggleSidebar }) => {
   const titles: Record<View, string> = {
     DASHBOARD: 'SELAMAT DATANG',
-    DATA_MURID: 'Senarai Data Murid',
+    DATA_MURID: 'Senarai Maklumat Murid',
     TAMBAH_MURID: 'Daftar Murid Baru',
     IMPORT_MURID: 'Import Data Pukal (Excel)',
     RINGKASAN: 'Rumusan & Laporan',
     MANUAL: 'Manual Penggunaan',
-    CARIAN_ARKIB: 'Semakan Arkib',
+    CARIAN_ARKIB: 'Cetak Kehadiran',
   };
 
   return (
