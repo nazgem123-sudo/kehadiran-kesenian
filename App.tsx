@@ -10,6 +10,7 @@ import Summary from './components/Summary';
 import NavigationMenu from './components/NavigationMenu';
 import Header from './components/Header';
 import ArchiveSearch from './components/ArchiveSearch';
+import LandingPage from './components/LandingPage';
 
 export const getLocalISOString = (date: Date = new Date()) => {
   if (!date) return "";
@@ -24,7 +25,7 @@ const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyw2S0o9Y8Xp_
 const SPREADSHEET_ID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<View>('DASHBOARD');
+  const [currentView, setCurrentView] = useState<View>('LANDING');
   const [showToast, setShowToast] = useState<boolean>(false);
   const [toastMsg, setToastMsg] = useState<string>('Data Berjaya Disimpan');
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
@@ -297,6 +298,8 @@ const App: React.FC = () => {
 
   const renderView = () => {
     switch (currentView) {
+      case 'LANDING':
+        return <LandingPage setView={setCurrentView} />;
       case 'DASHBOARD':
         return (
           <Dashboard 
@@ -585,22 +588,23 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden relative">
-      <Header 
-        currentView={currentView} 
-      />
-      <NavigationMenu 
-        currentView={currentView} 
-        setView={setCurrentView} 
-      />
-      <main className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-8 relative">
+    <div className="flex flex-col min-h-screen bg-[#020617] font-sans text-slate-200 overflow-x-hidden relative">
+      {currentView !== 'LANDING' && (
+        <>
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#0f172a]/40 via-[#020617] to-[#020617] pointer-events-none fixed"></div>
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none fixed"></div>
+          <Header currentView={currentView} setView={setCurrentView} />
+          <NavigationMenu currentView={currentView} setView={setCurrentView} />
+        </>
+      )}
+      <main className={`flex-1 overflow-y-auto relative ${currentView === 'LANDING' ? '' : 'p-2 sm:p-4 md:p-8'}`}>
         {showToast && (
           <div className={`fixed top-20 right-4 sm:right-8 z-50 px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce ${toastType === 'error' ? 'bg-rose-500 text-white' : 'bg-emerald-500 text-white'}`}>
             <i className={`fas ${toastType === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}`}></i>
             <span className="font-bold text-xs sm:text-sm">{toastMsg}</span>
           </div>
         )}
-        <div className="max-w-6xl mx-auto w-full">{renderView()}</div>
+        <div className={currentView === 'LANDING' ? 'w-full h-full' : 'max-w-6xl mx-auto w-full'}>{renderView()}</div>
       </main>
     </div>
   );

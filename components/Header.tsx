@@ -4,10 +4,12 @@ import { View } from '../types';
 
 interface HeaderProps {
   currentView: View;
+  setView: (view: View) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ currentView }) => {
+const Header: React.FC<HeaderProps> = ({ currentView, setView }) => {
   const titles: Record<View, string> = {
+    LANDING: '',
     DASHBOARD: 'SELAMAT DATANG',
     DATA_MURID: 'Senarai Maklumat Murid',
     TAMBAH_MURID: 'Daftar Murid Baru',
@@ -18,7 +20,7 @@ const Header: React.FC<HeaderProps> = ({ currentView }) => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-blue-700 to-blue-900 border-b border-blue-800 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-30 shadow-md">
+    <header className="bg-[#020617]/80 backdrop-blur-md border-b border-white/10 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-30 shadow-md">
       <div className="flex items-center gap-3 sm:gap-4">
         <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-xl flex items-center justify-center shadow-sm border border-slate-100 overflow-hidden">
           <img 
@@ -44,6 +46,15 @@ const Header: React.FC<HeaderProps> = ({ currentView }) => {
           </p>
         </div>
       </div>
+
+      <button
+        onClick={() => setView('LANDING')}
+        className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg transition-all text-white text-xs sm:text-sm font-bold tracking-wide"
+      >
+        <i className="fas fa-arrow-left"></i>
+        <span className="hidden sm:inline">Kembali ke Utama</span>
+        <span className="sm:hidden">Kembali</span>
+      </button>
     </header>
   );
 };

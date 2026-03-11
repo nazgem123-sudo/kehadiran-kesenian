@@ -28,4 +28,4 @@ export interface AttendanceRecord {
   timeSlot: string; // Slot masa sesi
 }
 
-export type View = 'DASHBOARD' | 'DATA_MURID' | 'TAMBAH_MURID' | 'IMPORT_MURID' | 'RINGKASAN' | 'MANUAL' | 'CARIAN_ARKIB';
+export type View = 'LANDING' | 'DASHBOARD' | 'DATA_MURID' | 'TAMBAH_MURID' | 'IMPORT_MURID' | 'RINGKASAN' | 'MANUAL' | 'CARIAN_ARKIB';

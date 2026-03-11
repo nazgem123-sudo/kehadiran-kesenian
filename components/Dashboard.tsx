@@ -247,12 +247,6 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex justify-between items-center">
               <h3 className="text-base sm:text-lg font-bold text-slate-800">Tanda Kehadiran</h3>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-slate-400 font-black uppercase">Masa:</span>
-                <select className="px-2 py-1.5 border rounded-lg text-[10px] bg-emerald-50 border-emerald-100 font-bold text-emerald-800 outline-none" value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)}>
-                  {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <button onClick={handleDeleteRecord} className="flex-1 sm:flex-none px-3 py-2 bg-rose-600 text-white text-[9px] font-black rounded-lg flex items-center justify-center gap-1.5"><i className="fas fa-trash-alt"></i>DELETE</button>
@@ -280,7 +274,13 @@ const Dashboard: React.FC<DashboardProps> = ({
             </select>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div className="relative">
+              <select className="w-full px-3 py-2 border rounded-xl text-[11px] bg-emerald-50 border-emerald-100 font-bold text-emerald-800 outline-none appearance-none" value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)}>
+                {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600 pointer-events-none text-[10px]"></i>
+            </div>
             <select className={`px-3 py-2 border rounded-xl text-[11px] font-bold appearance-none outline-none transition-all ${!selectedCoach ? 'bg-amber-50 border-amber-200 text-amber-700 ring-2 ring-amber-500 animate-pulse' : 'bg-blue-50 border-blue-100 text-blue-800'}`} value={selectedCoach} onChange={(e) => setSelectedCoach(e.target.value)}>
               <option value="">Wajib Pilih Jurulatih</option>
               {COACHES.map(coach => <option key={coach.name} value={coach.name}>{coach.name}</option>)}

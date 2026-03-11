@@ -18,7 +18,7 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({ currentView, setView })
   ];
 
   return (
-    <nav className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3 flex overflow-x-auto scrollbar-hide gap-2 sm:gap-4 shadow-sm z-20 sticky top-[73px] sm:top-[81px]">
+    <nav className="bg-[#020617]/80 backdrop-blur-md border-b border-white/10 px-4 sm:px-8 py-3 flex overflow-x-auto scrollbar-hide gap-2 sm:gap-4 shadow-sm z-20 sticky top-[73px] sm:top-[81px]">
       {menuItems.map((item) => (
         <button
           key={item.id}
@@ -26,7 +26,7 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({ currentView, setView })
           className={`whitespace-nowrap flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300 text-sm font-bold ${
             currentView === item.id 
               ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' 
-              : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200'
+              : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/5'
           }`}
         >
           <i className={`fas ${item.icon} ${currentView === item.id ? 'text-white' : 'text-slate-400'}`}></i>
