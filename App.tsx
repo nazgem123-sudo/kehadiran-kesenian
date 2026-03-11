@@ -2,13 +2,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Student, AttendanceRecord } from './types';
 import { INITIAL_STUDENTS } from './constants';
-import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import StudentList from './components/StudentList';
 import AddStudent from './components/AddStudent';
 import ImportStudent from './components/ImportStudent';
 import Summary from './components/Summary';
-import Sidebar from './components/Sidebar';
+import NavigationMenu from './components/NavigationMenu';
 import Header from './components/Header';
 import ArchiveSearch from './components/ArchiveSearch';
 
@@ -21,18 +20,17 @@ export const getLocalISOString = (date: Date = new Date()) => {
 };
 
 // URL Deployment yang dikemaskini mengikut arahan pengguna
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWBmwJJ5HEjCkuiFG4o3Yr_FmdySDu7QHkb6H1k-uVctgms7MoQD5MH7sfoZPhGrQOrg/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyw2S0o9Y8Xp_W4lv3nlhkL5WKd0zwIRNVSEq9JTqdd97vmAJgawQrBHIvi6gGdg82SLQ/exec';
 const SPREADSHEET_ID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<View>('DASHBOARD');
   const [showToast, setShowToast] = useState<boolean>(false);
   const [toastMsg, setToastMsg] = useState<string>('Data Berjaya Disimpan');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(window.innerWidth >= 1024);
   
-  const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwWBmwJJ5HEjCkuiFG4o3Yr_FmdySDu7QHkb6H1k-uVctgms7MoQD5MH7sfoZPhGrQOrg/exec';
+  const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbyw2S0o9Y8Xp_W4lv3nlhkL5WKd0zwIRNVSEq9JTqdd97vmAJgawQrBHIvi6gGdg82SLQ/exec';
   const DEFAULT_SID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
   const [googleScriptUrl, setGoogleScriptUrl] = useState<string>(() => {
@@ -46,7 +44,7 @@ const App: React.FC = () => {
     if (confirm('Reset tetapan sambungan ke nilai lalai?')) {
       setGoogleScriptUrl(DEFAULT_URL);
       setSpreadsheetId(DEFAULT_SID);
-      notifySuccess('Tetapan telah set semula.');
+      notifyMessage('Tetapan telah set semula.', 'success');
     }
   };
 
@@ -77,18 +75,11 @@ const App: React.FC = () => {
     localStorage.setItem('art_attendance', JSON.stringify(attendance));
   }, [attendance]);
 
-  const handleLogin = (user: string, pass: string) => {
-    if (user === 'admin' && pass === 'spark') {
-      setIsAuthenticated(true);
-    } else {
-      alert('Nama pengguna atau kata laluan salah!');
-    }
-  };
-
-  const notifySuccess = (msg?: string) => {
-    setToastMsg(msg || 'Data Berjaya Disimpan');
+  const notifyMessage = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToastMsg(msg);
+    setToastType(type);
     setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
+    setTimeout(() => setShowToast(false), 4000);
   };
 
   const syncToGoogleSheets = async (coachName: string, date: string, timeSlot: string, roomName: string) => {
@@ -96,7 +87,7 @@ const App: React.FC = () => {
     try {
       const filteredAttendance = attendance.filter(a => a.date === date && a.timeSlot === timeSlot);
       if (filteredAttendance.length === 0) {
-        alert('Tiada data kehadiran untuk disimpan bagi sesi ini.');
+        notifyMessage('Tiada data kehadiran untuk disimpan bagi sesi ini.', 'error');
         setIsSyncing(false);
         return;
       }
@@ -119,16 +110,16 @@ const App: React.FC = () => {
       
       const resText = await response.text();
       if (resText.toUpperCase().includes("OK")) {
-        notifySuccess('Berjaya Simpan ke Google Sheets!');
+        notifyMessage('Berjaya Simpan ke Google Sheets!', 'success');
       } else {
-        notifySuccess('Data dihantar ke Cloud.');
+        notifyMessage('Data dihantar ke Cloud.', 'success');
       }
     } catch (error: any) {
       console.error('Error syncing:', error);
       if (error.message === 'Failed to fetch') {
-        alert('RALAT SAMBUNGAN: Gagal menghubungi Google Sheets. Sila pastikan:\n1. Internet anda stabil.\n2. Google Script telah dideploy sebagai Web App (Anyone).\n3. URL Google Script adalah betul.');
+        notifyMessage('RALAT SAMBUNGAN: Gagal menghubungi Google Sheets. Sila pastikan internet stabil dan URL betul.', 'error');
       } else {
-        alert('Gagal menyambung ke Google Sheets: ' + error.message);
+        notifyMessage('Gagal menyambung ke Google Sheets: ' + error.message, 'error');
       }
     } finally {
       setIsSyncing(false);
@@ -167,32 +158,89 @@ const App: React.FC = () => {
             const otherDates = prev.filter(a => a.date !== date);
             return [...otherDates, ...newRecords];
           });
-          notifySuccess(`Data tarikh ${date.split('-').reverse().join('-')} dikemaskini.`);
+          notifyMessage(`Data tarikh ${date.split('-').reverse().join('-')} dikemaskini.`, 'success');
         }
       }
     } catch (error: any) {
       console.error('Refresh error:', error);
       if (error.message === 'Failed to fetch') {
-        notifySuccess('Ralat sambungan Cloud. Sila semak internet anda.');
+        notifyMessage('Ralat sambungan Cloud. Sila semak internet anda.', 'error');
       }
+    }
+  };
+
+  const syncStudentsToCloud = async (updatedStudents: Student[]) => {
+    try {
+      const response = await fetch(googleScriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'sync_students',
+          spreadsheetId: spreadsheetId,
+          students: updatedStudents
+        }),
+        redirect: 'follow'
+      });
+      const resText = await response.text();
+      if (resText.toUpperCase().includes("OK")) {
+        notifyMessage('Senarai Murid Disimpan ke Cloud!', 'success');
+      } else {
+        notifyMessage('Disimpan secara lokal (Gagal ke Cloud)', 'error');
+      }
+    } catch (error) {
+      console.error('Error syncing students:', error);
+      notifyMessage('Disimpan secara lokal (Gagal ke Cloud)', 'error');
+    }
+  };
+
+  const fetchStudentsFromCloud = async () => {
+    setIsSyncing(true);
+    try {
+      const response = await fetch(googleScriptUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'get_students',
+          spreadsheetId: spreadsheetId
+        }),
+        redirect: 'follow'
+      });
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setStudents(data);
+        notifyMessage('Senarai Murid Dimuat Turun!', 'success');
+      } else {
+        notifyMessage('Tiada data murid di Cloud.', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      notifyMessage('Gagal memuat turun dari Cloud. Sila semak sambungan internet atau tetapan URL.', 'error');
+    } finally {
+      setIsSyncing(false);
     }
   };
 
   const addStudent = (newStudent: Omit<Student, 'id'>) => {
     const studentWithId = { ...newStudent, id: Date.now().toString() };
-    setStudents(prev => [...prev, studentWithId]);
-    notifySuccess();
+    const updated = [...students, studentWithId];
+    setStudents(updated);
+    syncStudentsToCloud(updated);
+    notifyMessage('Menyimpan...', 'success');
     setCurrentView('DATA_MURID');
   };
 
   const updateStudent = (updatedStudent: Student) => {
-    setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
-    notifySuccess();
+    const updated = students.map(s => s.id === updatedStudent.id ? updatedStudent : s);
+    setStudents(updated);
+    syncStudentsToCloud(updated);
+    notifyMessage('Mengemaskini...', 'success');
   };
 
   const importStudents = (newStudents: Student[]) => {
-    setStudents(prev => [...prev, ...newStudents]);
-    notifySuccess();
+    const updated = [...students, ...newStudents];
+    setStudents(updated);
+    syncStudentsToCloud(updated);
+    notifyMessage('Mengimport...', 'success');
     setCurrentView('DATA_MURID');
   };
 
@@ -224,7 +272,7 @@ const App: React.FC = () => {
       setAttendance([]);
       setAttendanceHistory([]);
       localStorage.removeItem('art_attendance');
-      notifySuccess('Rekod kehadiran dikosongkan.');
+      notifyMessage('Rekod kehadiran dikosongkan.', 'success');
     }
   };
 
@@ -235,17 +283,17 @@ const App: React.FC = () => {
   };
 
   const deleteStudent = (id: string) => {
-    setStudents(prev => prev.filter(s => s.id !== id));
-    notifySuccess();
+    const updated = students.filter(s => s.id !== id);
+    setStudents(updated);
+    syncStudentsToCloud(updated);
+    notifyMessage('Memadam...', 'success');
   };
 
   const updateStudentNotes = (id: string, notes: string) => {
-    setStudents(prev => prev.map(s => s.id === id ? { ...s, notes } : s));
+    const updated = students.map(s => s.id === id ? { ...s, notes } : s);
+    setStudents(updated);
+    syncStudentsToCloud(updated);
   };
-
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
-  }
 
   const renderView = () => {
     switch (currentView) {
@@ -263,12 +311,13 @@ const App: React.FC = () => {
             onSave={syncToGoogleSheets}
             isSaving={isSyncing}
             onRefresh={fetchAttendanceByDate}
+            notifyMessage={notifyMessage}
           />
         );
       case 'CARIAN_ARKIB':
         return <ArchiveSearch googleScriptUrl={googleScriptUrl} attendance={attendance} spreadsheetId={spreadsheetId} />;
       case 'DATA_MURID':
-        return <StudentList students={students} onDelete={deleteStudent} onUpdateNotes={updateStudentNotes} onUpdateStudent={updateStudent} />;
+        return <StudentList students={students} onDelete={deleteStudent} onUpdateNotes={updateStudentNotes} onUpdateStudent={updateStudent} onFetchCloud={fetchStudentsFromCloud} isSyncing={isSyncing} />;
       case 'TAMBAH_MURID':
         return <AddStudent onAdd={addStudent} />;
       case 'IMPORT_MURID':
@@ -478,6 +527,46 @@ const App: React.FC = () => {
       }
       return ContentService.createTextOutput("OK: " + deletedCount + " rekod dipadam.").setMimeType(ContentService.MimeType.TEXT);
     }
+
+    if (params.action == 'sync_students') {
+      var studentSheet = ss.getSheetByName("Murid");
+      if (!studentSheet) {
+        studentSheet = ss.insertSheet("Murid");
+      }
+      studentSheet.clear();
+      studentSheet.appendRow(["ID", "NAMA", "JANTINA", "KUMPULAN", "TINGKATAN", "BIDANG", "ROLE", "NOTA"]);
+      
+      if (params.students && params.students.length > 0) {
+        var rows = params.students.map(function(s) {
+          return [s.id, s.name, s.gender, s.group, s.form, s.field, s.role || "MURID", s.notes || ""];
+        });
+        studentSheet.getRange(2, 1, rows.length, 8).setValues(rows);
+      }
+      return ContentService.createTextOutput("OK").setMimeType(ContentService.MimeType.TEXT);
+    }
+
+    if (params.action == 'get_students') {
+      var studentSheet = ss.getSheetByName("Murid");
+      if (!studentSheet) return ContentService.createTextOutput("[]").setMimeType(ContentService.MimeType.JSON);
+      
+      var data = studentSheet.getDataRange().getValues();
+      var students = [];
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][0]) {
+          students.push({
+            id: data[i][0].toString(),
+            name: data[i][1].toString(),
+            gender: data[i][2].toString(),
+            group: data[i][3].toString(),
+            form: data[i][4].toString(),
+            field: data[i][5].toString(),
+            role: data[i][6] ? data[i][6].toString() : "MURID",
+            notes: data[i][7] ? data[i][7].toString() : ""
+          });
+        }
+      }
+      return ContentService.createTextOutput(JSON.stringify(students)).setMimeType(ContentService.MimeType.JSON);
+    }
     
     return ContentService.createTextOutput("ERROR: Action tidak dikenali").setMimeType(ContentService.MimeType.TEXT);
     
@@ -491,29 +580,28 @@ const App: React.FC = () => {
           </div>
         );
       default:
-        return <Dashboard students={students} attendance={attendance} onMark={updateAttendance} onBulkMark={bulkUpdateAttendance} onClear={clearAttendance} onUndo={undoAttendance} canUndo={attendanceHistory.length > 0} onUpdateStudent={updateStudent} onSave={syncToGoogleSheets} isSaving={isSyncing} onRefresh={fetchAttendanceByDate} />;
+        return <Dashboard students={students} attendance={attendance} onMark={updateAttendance} onBulkMark={bulkUpdateAttendance} onClear={clearAttendance} onUndo={undoAttendance} canUndo={attendanceHistory.length > 0} onUpdateStudent={updateStudent} onSave={syncToGoogleSheets} isSaving={isSyncing} onRefresh={fetchAttendanceByDate} notifyMessage={notifyMessage} />;
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden relative">
-      <Sidebar 
+    <div className="flex flex-col min-h-screen bg-slate-50 font-sans text-slate-900 overflow-x-hidden relative">
+      <Header 
+        currentView={currentView} 
+      />
+      <NavigationMenu 
         currentView={currentView} 
         setView={setCurrentView} 
-        onLogout={() => setIsAuthenticated(false)} 
-        isOpen={isSidebarOpen}
-        toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       />
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <Header 
-          currentView={currentView} 
-          toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-        />
-        <main className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-8 relative">
-          {showToast && <div className="fixed top-20 right-4 sm:right-8 z-50 bg-emerald-500 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce"><i className="fas fa-check-circle"></i><span className="font-bold text-xs sm:text-sm">{toastMsg}</span></div>}
-          <div className="max-w-6xl mx-auto w-full">{renderView()}</div>
-        </main>
-      </div>
+      <main className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-8 relative">
+        {showToast && (
+          <div className={`fixed top-20 right-4 sm:right-8 z-50 px-4 py-2 sm:px-6 sm:py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce ${toastType === 'error' ? 'bg-rose-500 text-white' : 'bg-emerald-500 text-white'}`}>
+            <i className={`fas ${toastType === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}`}></i>
+            <span className="font-bold text-xs sm:text-sm">{toastMsg}</span>
+          </div>
+        )}
+        <div className="max-w-6xl mx-auto w-full">{renderView()}</div>
+      </main>
     </div>
   );
 };

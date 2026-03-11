@@ -18,6 +18,7 @@ interface DashboardProps {
   onSave: (coachName: string, date: string, timeSlot: string, roomName: string) => void;
   isSaving: boolean;
   onRefresh?: (date: string) => Promise<void>;
+  notifyMessage?: (msg: string, type: 'success' | 'error') => void;
 }
 
 const FIELD_COLORS: Record<string, string> = {
@@ -46,7 +47,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   onUpdateStudent,
   onSave,
   isSaving,
-  onRefresh
+  onRefresh,
+  notifyMessage
 }) => {
   const [selectedDate, setSelectedDate] = useState(getLocalISOString());
   const [selectedTime, setSelectedTime] = useState(TIME_SLOTS[0]);
@@ -85,8 +87,12 @@ const Dashboard: React.FC<DashboardProps> = ({
     const totalInView = filteredStudents.length;
     const rate = totalInView > 0 ? (presentCount / totalInView) * 100 : 0;
     const fieldStats = FIELDS.map(field => {
-      const count = filteredStudents.filter(s => s.field === field).length;
-      return { name: field, value: count };
+      const fieldStudents = filteredStudents.filter(s => s.field === field);
+      return { 
+        name: field, 
+        Lelaki: fieldStudents.filter(s => s.gender === 'LELAKI').length,
+        Perempuan: fieldStudents.filter(s => s.gender === 'PEREMPUAN').length
+      };
     });
     return { presentCount, rate, fieldStats, totalInView };
   }, [attendance, filteredStudents, selectedDate, selectedTime]);
@@ -125,11 +131,19 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const handleSaveClick = () => {
     if (!selectedCoach) {
-      alert("SILA PILIH NAMA JURULATIH TERLEBIH DAHULU SEBELUM SIMPAN.");
+      if (notifyMessage) {
+        notifyMessage("SILA PILIH NAMA JURULATIH TERLEBIH DAHULU SEBELUM SIMPAN.", "error");
+      } else {
+        alert("SILA PILIH NAMA JURULATIH TERLEBIH DAHULU SEBELUM SIMPAN.");
+      }
       return;
     }
     if (!selectedRoom) {
-      alert("SILA PILIH NAMA BILIK TERLEBIH DAHULU SEBELUM SIMPAN.");
+      if (notifyMessage) {
+        notifyMessage("SILA PILIH NAMA BILIK TERLEBIH DAHULU SEBELUM SIMPAN.", "error");
+      } else {
+        alert("SILA PILIH NAMA BILIK TERLEBIH DAHULU SEBELUM SIMPAN.");
+      }
       return;
     }
     onSave(selectedCoach, selectedDate, selectedTime, selectedRoom);
@@ -173,14 +187,14 @@ const Dashboard: React.FC<DashboardProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+    <div className="flex flex-col gap-6">
+      <div className="order-2 lg:order-1 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         <StatCard icon="fa-users" label="Murid (Tapis)" value={stats.totalInView} bgColor="bg-blue-100" textColor="text-blue-600" />
         <StatCard icon="fa-calendar-check" label="Hadir (Sesi Ini)" value={stats.presentCount} bgColor="bg-emerald-100" textColor="text-emerald-600" />
         <StatCard icon="fa-percentage" label="Kadar Sesi" value={`${stats.rate.toFixed(1)}%`} bgColor="bg-blue-600" textColor="text-white" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="order-1 lg:order-2 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 flex flex-col gap-6">
           <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200">
             <h3 className="text-base sm:text-lg font-bold text-slate-800 mb-4 sm:mb-6 flex items-center gap-2">
@@ -192,19 +206,37 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
           <div className="hidden lg:block bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">Statistik Bidang</h3>
-            <div className="h-48">
+            <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+              <i className="fas fa-chart-bar text-blue-600"></i>
+              Statistik Bidang (Jantina)
+            </h3>
+            <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.fieldStats}>
+                <BarChart data={stats.fieldStats} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10}} />
-                  <YAxis axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} cursor={{ fill: '#f8fafc' }} />
-                  <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                    {stats.fieldStats.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={FIELD_COLORS[entry.name as keyof typeof FIELD_COLORS] || '#3b82f6'} />
-                    ))}
-                  </Bar>
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fontSize: 9, fontWeight: 'bold', fill: '#64748b'}} 
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fontSize: 9, fill: '#94a3b8'}}
+                  />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '11px' }} 
+                    cursor={{ fill: '#f8fafc' }} 
+                  />
+                  <Legend 
+                    verticalAlign="top" 
+                    align="right" 
+                    iconType="circle" 
+                    wrapperStyle={{ fontSize: '10px', paddingBottom: '15px', fontWeight: 'bold' }} 
+                  />
+                  <Bar dataKey="Lelaki" fill="#2563eb" radius={[4, 4, 0, 0]} barSize={12} />
+                  <Bar dataKey="Perempuan" fill="#db2777" radius={[4, 4, 0, 0]} barSize={12} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -229,11 +261,15 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
             <div className="relative">
               <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
               <input type="text" placeholder="Cari nama..." className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] focus:ring-2 focus:ring-blue-500 font-semibold outline-none" value={searchName} onChange={(e) => setSearchName(e.target.value)} />
             </div>
+            <select className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 appearance-none outline-none" value={filterField} onChange={(e) => setFilterField(e.target.value as Field | 'ALL')}>
+              <option value="ALL">SEMUA BIDANG</option>
+              {FIELDS.map(f => <option key={f} value={f}>{f}</option>)}
+            </select>
             <select className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-bold text-slate-600 appearance-none outline-none" value={filterForm} onChange={(e) => setFilterForm(e.target.value as Form | 'ALL')}>
               <option value="ALL">SEMUA KELAS</option>
               {FORMS.map(f => <option key={f} value={f}>{f}</option>)}

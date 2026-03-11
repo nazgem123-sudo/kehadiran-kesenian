@@ -13,6 +13,7 @@ export interface Student {
   field: Field;
   role?: string; // Role Akses
   notes?: string;
+  imageUrl?: string;
 }
 
 export interface Coach {

@@ -8,9 +8,11 @@ interface StudentListProps {
   onDelete: (id: string) => void;
   onUpdateNotes: (id: string, notes: string) => void;
   onUpdateStudent: (student: Student) => void;
+  onFetchCloud?: () => void;
+  isSyncing?: boolean;
 }
 
-const StudentList: React.FC<StudentListProps> = ({ students, onDelete, onUpdateNotes, onUpdateStudent }) => {
+const StudentList: React.FC<StudentListProps> = ({ students, onDelete, onUpdateNotes, onUpdateStudent, onFetchCloud, isSyncing }) => {
   const [filterForm, setFilterForm] = useState<Form | 'ALL'>('ALL');
   const [filterField, setFilterField] = useState<Field | 'ALL'>('ALL');
   const [filterGroup, setFilterGroup] = useState<Group | 'ALL'>('ALL');
@@ -43,6 +45,19 @@ const StudentList: React.FC<StudentListProps> = ({ students, onDelete, onUpdateN
     <div className="relative">
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-6 border-b border-slate-100 space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
+            <h2 className="text-lg font-bold text-slate-800">Senarai Murid</h2>
+            {onFetchCloud && (
+              <button 
+                onClick={onFetchCloud} 
+                disabled={isSyncing}
+                className="px-4 py-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-2"
+              >
+                <i className={`fas fa-cloud-download-alt ${isSyncing ? 'animate-bounce' : ''}`}></i>
+                {isSyncing ? 'Memuat Turun...' : 'Muat Turun Dari Cloud'}
+              </button>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             <div className="md:col-span-2 relative">
               <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
