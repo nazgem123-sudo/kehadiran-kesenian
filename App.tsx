@@ -32,7 +32,7 @@ const App: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(window.innerWidth >= 1024);
   
-  const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbxcHBzCt1fhAAX9icwsr8qVBD7RCAUtCks8CpRQWNFaGNavznlfCrKLCU3hzUBR_bFODA/exec';
+  const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbwWBmwJJ5HEjCkuiFG4o3Yr_FmdySDu7QHkb6H1k-uVctgms7MoQD5MH7sfoZPhGrQOrg/exec';
   const DEFAULT_SID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
   const [googleScriptUrl, setGoogleScriptUrl] = useState<string>(() => {
