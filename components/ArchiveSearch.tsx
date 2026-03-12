@@ -95,6 +95,10 @@ const ArchiveSearch: React.FC<ArchiveSearchProps> = ({ googleScriptUrl, attendan
       setErrorMsg("URL Skrip Google tidak dijumpai.");
       return;
     }
+    if (!googleScriptUrl.startsWith('http')) {
+      setErrorMsg("URL Skrip Google tidak sah. Sila pastikan URL bermula dengan 'https://'.");
+      return;
+    }
     setIsSearching(true);
     setHasSearched(false);
     setErrorMsg(null);
