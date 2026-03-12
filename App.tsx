@@ -21,7 +21,7 @@ export const getLocalISOString = (date: Date = new Date()) => {
 };
 
 // URL Deployment yang dikemaskini mengikut arahan pengguna
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyw2S0o9Y8Xp_W4lv3nlhkL5WKd0zwIRNVSEq9JTqdd97vmAJgawQrBHIvi6gGdg82SLQ/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyt4H5mWWlP7fAWYRA1QBVvA_3E3_bCEOhmOo6JeF23IuQVkDx3sSwqCpb_l1i0kNXsqw/exec';
 const SPREADSHEET_ID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
 const App: React.FC = () => {
@@ -31,7 +31,7 @@ const App: React.FC = () => {
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   
-  const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbyw2S0o9Y8Xp_W4lv3nlhkL5WKd0zwIRNVSEq9JTqdd97vmAJgawQrBHIvi6gGdg82SLQ/exec';
+  const DEFAULT_URL = 'https://script.google.com/macros/s/AKfycbyt4H5mWWlP7fAWYRA1QBVvA_3E3_bCEOhmOo6JeF23IuQVkDx3sSwqCpb_l1i0kNXsqw/exec';
   const DEFAULT_SID = '1Otr6yM4-Zx2ifK_s7Wd2ofu8pE05hN561zpqDM-RFCA';
 
   const [googleScriptUrl, setGoogleScriptUrl] = useState<string>(() => {
