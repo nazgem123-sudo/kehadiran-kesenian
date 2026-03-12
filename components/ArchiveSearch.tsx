@@ -234,6 +234,14 @@ const ArchiveSearch: React.FC<ArchiveSearchProps> = ({ googleScriptUrl, attendan
   };
 
   const handlePrintPDF = () => {
+    generatePDF(true);
+  };
+
+  const handlePreviewPDF = () => {
+    generatePDF(false);
+  };
+
+  const generatePDF = (autoPrint: boolean) => {
     if (filteredResults.length === 0) return;
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -322,23 +330,25 @@ const ArchiveSearch: React.FC<ArchiveSearchProps> = ({ googleScriptUrl, attendan
         ${pageIdx < groupKeys.length - 1 ? '<div class="page-break"></div>' : ''}
       `;
     });
+    
+    const scriptTag = autoPrint ? `<script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); };</script>` : '';
 
     printWindow.document.write(`
       <html>
         <head>
-          <title>ARKIB - ${formattedDate}</title>
+          <title>${autoPrint ? 'ARKIB' : 'PREVIEW'} - ${formattedDate}</title>
           <style>
             @media print { .page-break { page-break-after: always; } .grey-box { background-color: #d1d5db !important; -webkit-print-color-adjust: exact; } .dark-grey { background-color: #000 !important; color: #fff !important; } }
-            body { font-family: 'Arial Narrow', sans-serif; font-size: 10pt; }
-            .page-container { padding: 10mm; height: 270mm; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: -1px; }
+            body { font-family: 'Arial Narrow', sans-serif; font-size: 10pt; ${!autoPrint ? 'padding: 20px; max-width: 800px; margin: 0 auto; background: #f8fafc; box-shadow: 0 0 20px rgba(0,0,0,0.1);' : ''} }
+            .page-container { padding: 10mm; height: 270mm; ${!autoPrint ? 'background: #fff; margin-bottom: 20px; border: 1px solid #e2e8f0;' : ''} }
+            table { width: 100%; border-collapse: collapse; margin-bottom: -1px; background: #fff; }
             th, td { border: 1.5px solid black; padding: 4px; }
             .grey-box { background-color: #d1d5db; font-weight: bold; text-align: center; }
-            .main-header { font-size: 12pt; font-weight: bold; padding: 10px; border: 1.5px solid black; text-align: center; }
+            .main-header { font-size: 12pt; font-weight: bold; padding: 10px; border: 1.5px solid black; text-align: center; background: #fff; }
             .data-cell { font-size: 9pt; font-weight: bold; text-transform: uppercase; }
           </style>
         </head>
-        <body>${pagesHtml}<script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); };</script></body>
+        <body>${pagesHtml}${scriptTag}</body>
       </html>
     `);
     printWindow.document.close();
@@ -459,6 +469,7 @@ const ArchiveSearch: React.FC<ArchiveSearchProps> = ({ googleScriptUrl, attendan
                     </div>
                   </div>
                   <div className="flex gap-2">
+                    <button onClick={handlePreviewPDF} className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-5 py-3 rounded-2xl font-black text-[10px] uppercase transition-colors">PREVIEW</button>
                     <button onClick={handlePrintPDF} className="bg-white text-indigo-600 px-5 py-3 rounded-2xl font-black text-[10px] uppercase">CETAK PDF</button>
                     <button 
                       onClick={() => { console.log("Button DELETE clicked"); handleDeleteArchive(); }} 
